@@ -1,5 +1,0 @@
-repo=chengyouzheng/kidtv-guard
------ assets -----
-kidtv-guard-v1.9.apk|485913|uploaded|https://github.com/chengyouzheng/kidtv-guard/releases/download/v1.9/kidtv-guard-v1.9.apk
------ count -----
-1
