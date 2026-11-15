@@ -1,0 +1,23 @@
+name: patch-shot
+
+on:
+  push:
+    branches: [ main ]
+
+permissions:
+  contents: write
+
+jobs:
+  shot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Replace answered screenshot
+        run: |
+          curl -fsSL -o docs/screenshots/03-quiz-correct.png "https://aka.doubaocdn.com/s/UaNAIfWNUK"
+          ls -l docs/screenshots/03-quiz-correct.png
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/screenshots/03-quiz-correct.png
+          git commit -m "docs: 换成 v2.0 答对页面截图" || echo nothing
+          git push
