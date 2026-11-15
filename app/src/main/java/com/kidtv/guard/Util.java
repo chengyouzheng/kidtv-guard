@@ -195,4 +195,32 @@ public class Util {
         String ip = localIp();
         return "http://" + (ip == null ? "127.0.0.1" : ip) + ":" + HttpPanel.PORT + "/";
     }
+
+    /** 圆角矩形背景（纯 Java 画，不依赖 xml 资源） */
+    public static android.graphics.drawable.GradientDrawable roundBg(Context c, int fill,
+            int cornerDp, int strokeDp, int strokeColor) {
+        android.graphics.drawable.GradientDrawable g =
+                new android.graphics.drawable.GradientDrawable();
+        g.setShape(android.graphics.drawable.GradientDrawable.RECTANGLE);
+        g.setColor(fill);
+        g.setCornerRadius(dp(c, cornerDp));
+        if (strokeDp > 0) {
+            g.setStroke(dp(c, strokeDp), strokeColor);
+        }
+        return g;
+    }
+
+    /** 普通 / 聚焦 / 按下 三态的圆角背景，给遥控器焦点用 */
+    public static android.graphics.drawable.StateListDrawable selector(Context c,
+            int fill, int focusFill, int pressFill, int cornerDp,
+            int strokeDp, int strokeColor, int focusStrokeDp, int focusStrokeColor) {
+        android.graphics.drawable.StateListDrawable sl =
+                new android.graphics.drawable.StateListDrawable();
+        sl.addState(new int[]{android.R.attr.state_pressed},
+                roundBg(c, pressFill, cornerDp, strokeDp, strokeColor));
+        sl.addState(new int[]{android.R.attr.state_focused},
+                roundBg(c, focusFill, cornerDp, focusStrokeDp, focusStrokeColor));
+        sl.addState(new int[]{}, roundBg(c, fill, cornerDp, strokeDp, strokeColor));
+        return sl;
+    }
 }
