@@ -2,140 +2,274 @@
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#2E7D32">
 <title>学习看电视 · 家长面板</title>
 <style>
-  :root{--g:#2E7D32;--bg:#F3F7F1;--line:#DDE7DA;}
-  *{box-sizing:border-box}
-  body{margin:0;font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:#1e2b1c;}
-  .wrap{max-width:640px;margin:0 auto;padding:16px 16px 40px;}
-  h1{font-size:22px;margin:8px 0 4px}
-  .sub{color:#6c7a68;font-size:13px;margin-bottom:16px}
-  .card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px;}
-  .card h2{font-size:16px;margin:0 0 12px;color:#26401f}
+  :root{
+    --g:#2E7D32;--g-dark:#1B5E20;--g-mid:#43A047;--g-soft:#EDF6EE;
+    --ink:#1B2C1F;--soft:#5F7466;--muted:#8A9C8D;
+    --bg1:#F8FCF9;--bg2:#DCEBE0;--bg3:#CFE3D5;
+    --card:#FFFFFF;--line:#DFEAE0;
+    --red:#B3261E;--red-bg:#FDECEE;--red-line:#F2C7CB;
+    --shadow:0 8px 20px rgba(27,94,32,.07);
+    --r-lg:20px;--r-md:14px;--r-sm:10px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Noto Sans SC","Microsoft YaHei",sans-serif;
+    color:var(--ink);
+    background:linear-gradient(180deg,var(--bg1) 0%,var(--bg2) 62%,var(--bg3) 100%);
+    background-attachment:fixed;
+    min-height:100vh;
+    line-height:1.5;
+  }
+  .wrap{max-width:560px;margin:0 auto;padding:14px 14px 52px}
+
+  .top{display:flex;align-items:center;gap:12px;padding:6px 2px 14px}
+  .logo{
+    width:46px;height:46px;flex:0 0 46px;border-radius:14px;
+    background:linear-gradient(160deg,#3C9143,#1B5E20);
+    color:#fff;font-size:15px;font-weight:700;letter-spacing:.5px;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 6px 14px rgba(27,94,32,.22);
+  }
+  h1{font-size:19px;margin:0;font-weight:700;letter-spacing:.3px}
+  .sub{font-size:13px;color:var(--soft);margin-top:2px;word-break:break-all}
+
+  .msg{
+    position:fixed;left:50%;top:12px;transform:translate(-50%,-160%);
+    max-width:min(520px,92vw);padding:11px 16px;border-radius:14px;
+    font-size:15px;font-weight:600;z-index:60;box-shadow:0 10px 24px rgba(0,0,0,.12);
+    transition:transform .28s cubic-bezier(.2,.9,.2,1);pointer-events:none;
+    line-height:1.45;word-break:break-word;
+  }
+  .msg.ok{transform:translate(-50%,0);background:#E4F5E5;color:#14571B;border:1px solid #A8D8AC}
+  .msg.err{transform:translate(-50%,0);background:var(--red-bg);color:var(--red);border:1px solid var(--red-line)}
+
+  .hero{
+    background:var(--card);border-radius:var(--r-lg);padding:18px 18px 16px;
+    box-shadow:var(--shadow);border:1px solid rgba(46,125,50,.10);margin-bottom:14px;
+    position:relative;overflow:hidden;
+  }
+  .hero::after{
+    content:"";position:absolute;right:-40px;top:-50px;width:150px;height:150px;border-radius:50%;
+    background:radial-gradient(circle,rgba(67,160,71,.15),rgba(67,160,71,0) 70%);
+  }
+  .hero-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .label{font-size:14px;color:var(--soft);font-weight:600;letter-spacing:.4px}
+  .pill{
+    font-size:13px;font-weight:700;padding:5px 11px;border-radius:999px;
+    background:var(--g-soft);color:var(--g-dark);border:1px solid #CFE3D4;white-space:nowrap;
+  }
+  .pill.off{background:var(--red-bg);color:var(--red);border-color:var(--red-line)}
+  .hero-num{display:flex;align-items:baseline;gap:8px;margin:6px 0 2px}
+  .hero-num b{font-size:46px;line-height:1.05;color:var(--g-dark);font-weight:800;letter-spacing:-.5px}
+  .hero-num i{font-style:normal;font-size:14px;color:var(--soft);font-weight:600}
+  .bar{height:10px;border-radius:999px;background:#EDF3ED;margin:12px 0 10px;overflow:hidden}
+  .bar span{
+    display:block;height:100%;width:0%;border-radius:999px;
+    background:linear-gradient(90deg,#7CC98A,#2E7D32);transition:width .4s ease;
+  }
+  .hero-meta{display:flex;justify-content:space-between;font-size:14px;color:var(--soft)}
+  .hero-meta b{color:var(--ink);font-weight:700}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+  .chip{
+    font-size:13px;color:var(--g-dark);background:#F2F8F2;border:1px solid #DAEBDD;
+    border-radius:999px;padding:6px 10px;font-weight:600;white-space:nowrap;
+  }
+  .chip.warn{color:var(--red);background:var(--red-bg);border-color:var(--red-line)}
+  .hero-note{font-size:13px;color:var(--muted);margin-top:10px;line-height:1.6}
+
+  .card{
+    background:var(--card);border-radius:var(--r-lg);padding:16px;
+    box-shadow:var(--shadow);border:1px solid rgba(46,125,50,.10);margin-bottom:14px;
+  }
+  .ct{display:flex;align-items:center;gap:9px;margin-bottom:12px}
+  .ct i{width:4px;height:16px;border-radius:3px;background:linear-gradient(180deg,#4CAF50,#2E7D32);display:block;flex:0 0 4px}
+  .ct h2{font-size:16px;margin:0;font-weight:700;color:#22401F}
+
   .row{display:flex;gap:10px;flex-wrap:wrap}
-  .f{flex:1 1 130px;display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
-  .f label{font-size:13px;color:#5f6b5a}
-  input,select{font-size:16px;padding:9px 10px;border:1px solid #cfdccb;border-radius:10px;background:#fbfdfa;width:100%}
-  button{font-size:16px;padding:11px 16px;border-radius:12px;border:0;background:var(--g);color:#fff;cursor:pointer}
-  button.ghost{background:#eaf3e8;color:#2E7D32}
-  button.danger{background:#c62828}
-  .stat{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:8px}
-  .stat .k{flex:1 1 30%;background:#f4faf2;border-radius:10px;padding:10px;text-align:center}
-  .stat .k b{display:block;font-size:22px;color:var(--g)}
-  .stat .k span{font-size:12px;color:#6c7a68}
-  textarea{width:100%;min-height:120px;font-size:13px;font-family:monospace;padding:10px;border:1px solid #cfdccb;border-radius:10px}
-  .msg{padding:9px 12px;border-radius:10px;font-size:14px;margin-bottom:12px;display:none}
-  .msg.ok{display:block;background:#e7f5e6;color:#1b5e20}
-  .msg.err{display:block;background:#fdecea;color:#b71c1c}
-  .hint{font-size:12px;color:#7b8877;line-height:1.5}
-  .lock{position:fixed;inset:0;background:rgba(243,247,241,.98);display:flex;align-items:center;justify-content:center;padding:20px}
-  .lock .box{max-width:340px;width:100%;background:#fff;border-radius:16px;padding:20px;border:1px solid var(--line)}
+  .f{flex:1 1 140px;display:flex;flex-direction:column;gap:6px;margin-bottom:11px;min-width:0}
+  .f label{font-size:13px;color:var(--soft);font-weight:600;letter-spacing:.2px}
+  input,select,textarea{
+    font-family:inherit;font-size:16px;color:var(--ink);
+    border:1px solid #D3E2D7;background:#FBFDFA;border-radius:var(--r-md);
+    width:100%;padding:0 12px;height:46px;outline:none;transition:border-color .18s,box-shadow .18s;
+    appearance:none;-webkit-appearance:none;
+  }
+  select{
+    background-image:linear-gradient(45deg,transparent 50%,#7A8F7C 50%),linear-gradient(135deg,#7A8F7C 50%,transparent 50%);
+    background-position:calc(100% - 18px) 21px,calc(100% - 13px) 21px;
+    background-size:5px 5px,5px 5px;background-repeat:no-repeat;padding-right:34px;
+  }
+  input:focus,select:focus,textarea:focus{border-color:var(--g-mid);box-shadow:0 0 0 3px rgba(67,160,71,.16);background:#fff}
+  textarea{height:auto;min-height:120px;padding:11px 12px;line-height:1.55;font-size:14px;font-family:ui-monospace,Menlo,Consolas,monospace;resize:vertical}
+  textarea.short{min-height:84px}
+
+  .btns{display:grid;grid-template-columns:repeat(auto-fit,minmax(136px,1fr));gap:10px;margin-top:4px}
+  button{
+    font-family:inherit;font-size:16px;font-weight:700;letter-spacing:.3px;
+    height:46px;padding:0 16px;border-radius:var(--r-md);border:1px solid transparent;
+    background:linear-gradient(180deg,#3C9143,#2A7330);color:#fff;cursor:pointer;
+    box-shadow:0 6px 14px rgba(27,94,32,.18);transition:transform .12s,filter .18s;
+  }
+  button:active{transform:scale(.985);filter:brightness(.97)}
+  button.ghost{background:#EDF6EE;color:var(--g-dark);border-color:#CFE3D4;box-shadow:none}
+  button.danger{background:var(--red-bg);color:var(--red);border-color:var(--red-line);box-shadow:none}
+  button.wide{width:100%}
+  .btns.three button.danger{grid-column:1/-1}
+
+  .qr-box{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+  .qr-frame{
+    width:170px;height:170px;flex:0 0 170px;border-radius:16px;background:#fff;
+    border:1px solid var(--line);box-shadow:inset 0 0 0 6px #F7FBF7;
+    display:flex;align-items:center;justify-content:center;padding:8px;
+  }
+  .qr-frame img{width:100%;height:100%;object-fit:contain;border-radius:10px;background:#fff}
+  .qr-text{flex:1 1 190px;font-size:13px;color:var(--soft);line-height:1.65}
+
+  .hint{font-size:13px;color:var(--soft);line-height:1.65}
+  .hint b{color:var(--ink)}
+
+  .lock{
+    position:fixed;inset:0;z-index:80;display:flex;align-items:center;justify-content:center;padding:20px;
+    background:linear-gradient(180deg,var(--bg1) 0%,var(--bg2) 60%,var(--bg3) 100%);
+  }
+  .lock .box{
+    width:100%;max-width:360px;background:#fff;border-radius:22px;padding:26px 22px 22px;
+    box-shadow:0 18px 40px rgba(27,94,32,.16);border:1px solid rgba(46,125,50,.10);
+  }
+  .lock .badge{
+    width:58px;height:58px;border-radius:18px;margin:0 auto 14px;
+    background:linear-gradient(160deg,#3C9143,#1B5E20);color:#fff;font-size:17px;font-weight:800;
+    display:flex;align-items:center;justify-content:center;letter-spacing:1px;
+    box-shadow:0 10px 22px rgba(27,94,32,.24);
+  }
+  .lock h1{text-align:center;font-size:20px;margin:0 0 4px}
+  .lock .sub{text-align:center;margin-bottom:18px}
+  .lock .f{margin-bottom:14px}
+  .lock .hint{text-align:center;margin-top:14px}
 </style>
 </head>
 <body>
+
 <div id="lock" class="lock">
   <div class="box">
+    <div class="badge">TV</div>
     <h1>家长面板</h1>
     <div class="sub">输入家长密码（和电视上设置的一致）</div>
-    <div class="f"><label>密码</label><input id="pwdInput" type="password" autocomplete="off"></div>
-    <button id="goBtn" style="width:100%">进入</button>
-    <div class="hint" style="margin-top:12px">提示：只有同一 WiFi 下的设备能打开这个页面。</div>
+    <div class="f"><label>密码</label><input id="pwdInput" type="password" autocomplete="off" placeholder="请输入密码"></div>
+    <button id="goBtn" class="wide">进入面板</button>
+    <div class="hint">只有同一 WiFi 下的设备能打开这个页面</div>
   </div>
 </div>
 
 <div class="wrap">
-  <h1>学习看电视 · 家长面板</h1>
-  <div class="sub" id="hostLine"></div>
+  <div class="top">
+    <div class="logo">TV</div>
+    <div style="min-width:0">
+      <h1>学习看电视 · 家长面板</h1>
+      <div class="sub" id="hostLine"></div>
+    </div>
+  </div>
+
   <div class="msg" id="msg"></div>
 
-  <div class="card">
-    <h2>今天的情况</h2>
-    <div class="stat">
-      <div class="k"><b id="sUsed">-</b><span>已看（分钟）</span></div>
-      <div class="k"><b id="sLimit">-</b><span>今日上限</span></div>
-      <div class="k"><b id="sRemain">-</b><span>还剩</span></div>
+  <div class="hero">
+    <div class="hero-top">
+      <span class="label">今天还剩</span>
+      <span class="pill" id="chipWindow">—</span>
     </div>
-    <div class="hint" id="sExtra"></div>
+    <div class="hero-num"><b id="sRemain">-</b><i>分钟</i></div>
+    <div class="bar"><span id="heroBar"></span></div>
+    <div class="hero-meta">
+      <span>已看 <b id="sUsed">-</b> 分钟</span>
+      <span>今日上限 <b id="sLimit">-</b> 分钟</span>
+    </div>
+    <div class="chips">
+      <span class="chip" id="chipQuiz">答题 —</span>
+      <span class="chip" id="chipPause">管控中</span>
+    </div>
+    <div class="hero-note" id="sExtra"></div>
   </div>
 
   <div class="card">
-    <h2>手机扫码进入（地址跟着电视 IP 自动变）</h2>
-    <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap">
-      <img id="qrImg" alt="面板二维码" style="width:170px;height:170px;border:1px solid var(--line);border-radius:10px;background:#fff">
-      <div class="hint" style="flex:1;min-width:180px" id="qrHint"></div>
+    <div class="ct"><i></i><h2>远程放行</h2></div>
+    <div class="hint" id="pauseInfo" style="margin-bottom:12px"></div>
+    <div class="btns three">
+      <button id="unlock10Btn">放行 10 分钟</button>
+      <button id="unlock30Btn" class="ghost">放行 30 分钟</button>
+      <button id="relockBtn" class="danger">立即恢复管控</button>
     </div>
   </div>
 
   <div class="card">
-    <h2>修改家长密码</h2>
+    <div class="ct"><i></i><h2>规则</h2></div>
     <div class="row">
-      <div class="f"><label>新密码（至少 4 位）</label><input id="np1" type="password" autocomplete="new-password"></div>
-      <div class="f"><label>再输一次</label><input id="np2" type="password" autocomplete="new-password"></div>
-    </div>
-    <button id="pwdBtn" style="width:100%">修改密码</button>
-    <div class="hint" style="margin-top:8px">改完手机端会用新密码；电视上的「家长设置」「联系家长解锁」也都用新密码。</div>
-  </div>
-
-  <div class="card">
-    <h2>规则</h2>
-    <div class="row">
-      <div class="f"><label>每日基础时长（分钟）</label><input id="cDaily" type="number" min="0" max="720"></div>
+      <div class="f"><label>每日基础时长（分钟）</label><input id="cDaily" type="number" min="0" max="720" inputmode="numeric"></div>
       <div class="f"><label>允许时段开始</label><input id="cWs" type="time"></div>
       <div class="f"><label>允许时段结束</label><input id="cWe" type="time"></div>
     </div>
     <div class="row">
-      <div class="f"><label>一轮题数</label><input id="cQc" type="number" min="1" max="50"></div>
-      <div class="f"><label>及格线（%）</label><input id="cPass" type="number" min="1" max="100"></div>
-      <div class="f"><label>通过奖励（分钟）</label><input id="cReward" type="number" min="0" max="600"></div>
+      <div class="f"><label>一轮题数</label><input id="cQc" type="number" min="1" max="50" inputmode="numeric"></div>
+      <div class="f"><label>及格线（%）</label><input id="cPass" type="number" min="1" max="100" inputmode="numeric"></div>
+      <div class="f"><label>通过奖励（分钟）</label><input id="cReward" type="number" min="0" max="600" inputmode="numeric"></div>
     </div>
     <div class="f"><label>管控开关</label>
       <select id="cEnabled"><option value="1">开启</option><option value="0">关闭</option></select>
     </div>
-    <div class="row" style="margin-top:6px">
-      <button id="saveBtn" style="flex:1">保存规则</button>
-      <button id="clearBtn" class="ghost" style="flex:1">今日用量清零</button>
+    <div class="btns">
+      <button id="saveBtn">保存规则</button>
+      <button id="clearBtn" class="ghost">今日用量清零</button>
     </div>
   </div>
 
   <div class="card">
-    <h2>远程放行（家长在手机上操作）</h2>
-    <div class="hint" id="pauseInfo" style="margin-bottom:10px"></div>
+    <div class="ct"><i></i><h2>教材</h2></div>
+    <div class="hint" id="bookInfo" style="margin-bottom:12px"></div>
+    <div class="f"><label>选择册别，切换后孩子答题就用这一册</label><select id="bookSel"></select></div>
+    <button id="bookBtn" class="wide">切换到这一册</button>
+  </div>
+
+  <div class="card">
+    <div class="ct"><i></i><h2>手机扫码进入</h2></div>
+    <div class="qr-box">
+      <div class="qr-frame"><img id="qrImg" alt="面板二维码"></div>
+      <div class="qr-text" id="qrHint"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ct"><i></i><h2>修改家长密码</h2></div>
     <div class="row">
-      <button id="unlock10Btn" style="flex:1">放行 10 分钟</button>
-      <button id="unlock30Btn" class="ghost" style="flex:1">放行 30 分钟</button>
-      <button id="relockBtn" class="danger" style="flex:1">立即恢复管控</button>
+      <div class="f"><label>新密码（至少 4 位）</label><input id="np1" type="password" autocomplete="new-password"></div>
+      <div class="f"><label>再输一次</label><input id="np2" type="password" autocomplete="new-password"></div>
     </div>
+    <button id="pwdBtn" class="wide">修改密码</button>
+    <div class="hint" style="margin-top:10px">改完手机端会用新密码；电视上的「家长设置」「联系家长解锁」也都用新密码。</div>
   </div>
 
   <div class="card">
-    <h2>教材（年级 / 上册下册）</h2>
-    <div class="hint" id="bookInfo" style="margin-bottom:10px"></div>
-    <div class="f">
-      <label>选择册别，切换后孩子答题就用这一册</label>
-      <select id="bookSel"></select>
-    </div>
-    <button id="bookBtn" style="width:100%">切换到这一册</button>
-  </div>
-
-  <div class="card">
-    <h2>题库</h2>
-    <div class="hint" id="bankInfo" style="margin-bottom:10px"></div>
+    <div class="ct"><i></i><h2>题库</h2></div>
+    <div class="hint" id="bankInfo" style="margin-bottom:12px"></div>
     <div class="f"><label>粘贴题库 JSON（格式 {"items":[...]}）</label><textarea id="bankText" placeholder='{"items":[{"q":"1+1=?","a":["1","2"],"k":1,"type":"single"}]}'></textarea></div>
-    <div class="row">
-      <button id="importBtn" style="flex:1">导入题库</button>
-      <button id="resetBankBtn" class="ghost" style="flex:1">恢复内置题</button>
+    <div class="btns">
+      <button id="importBtn">导入题库</button>
+      <button id="resetBankBtn" class="ghost">恢复内置题</button>
     </div>
   </div>
 
   <div class="card">
-    <h2>白名单（不算看电视的应用）</h2>
-    <div class="f"><label>包名，逗号分隔</label><textarea id="whiteList" style="min-height:80px;font-size:12px"></textarea></div>
-    <button id="saveWhiteBtn" class="ghost" style="width:100%">保存白名单</button>
+    <div class="ct"><i></i><h2>白名单（不算看电视的应用）</h2></div>
+    <div class="f"><label>包名，逗号分隔</label><textarea id="whiteList" class="short"></textarea></div>
+    <button id="saveWhiteBtn" class="ghost wide">保存白名单</button>
   </div>
 
   <div class="card">
-    <h2>说明</h2>
+    <div class="ct"><i></i><h2>说明</h2></div>
     <div class="hint">
       孩子看电视的时间按「非白名单应用在前台」累计，超出今日上限或不在允许时段时，
       电视上会弹出拦截页，可以去做题换时长。<br>
@@ -204,7 +338,31 @@ function render(s){
   el('qrImg').src = '/qr.png?u=' + encodeURIComponent(u);
   el('qrHint').textContent = '这个码指向 ' + u
     + '。下次电视 IP 变了，直接到电视首页看新的二维码，或在这个页面刷新一下即可，不用记 IP。';
+  renderExtra(s);
 }
+
+// 新版视觉：进度条、状态胶囊、剩余量配色（纯展示，不改接口）
+function renderExtra(s){
+  try{
+    var lim = Math.max(1, s.limitMin || 1);
+    var pct = Math.max(0, Math.min(100, (s.usedMin / lim) * 100));
+    el('heroBar').style.width = pct + '%';
+    var win = el('chipWindow');
+    win.textContent = s.inWindow ? '时段内可看' : '时段外拦截';
+    win.className = 'pill' + (s.inWindow ? '' : ' off');
+    el('chipQuiz').textContent = '答题 ' + (s.quizRounds||0) + ' 轮 · 通过 ' + (s.quizPass||0) + ' 轮';
+    var pause = el('chipPause');
+    if(s.pauseLeftMin > 0){
+      pause.textContent = '放行中 · 还剩 ' + s.pauseLeftMin + ' 分钟';
+      pause.className = 'chip warn';
+    } else {
+      pause.textContent = '管控正常';
+      pause.className = 'chip';
+    }
+    el('sRemain').style.color = (s.remainMin <= 0) ? '#B3261E' : (s.remainMin <= 5 ? '#B26A00' : '#1B5E20');
+  }catch(e){}
+}
+
 function load(){
   api('/api/state').then(function(s){
     if(s.ok === false && /密码/.test(s.error || '')){ el('lock').style.display = 'flex'; return; }
