@@ -16,16 +16,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh api repos/chengyouzheng/kidtv-guard/releases/tags/v2.0 > /tmp/rel.json
-          python3 - <<'PY' > release-assets.txt
-import json
-r=json.load(open('/tmp/rel.json'))
-print('tag=%s name=%s draft=%s prerelease=%s' % (r['tag_name'], r['name'], r['draft'], r['prerelease']))
-print('assets=%d' % len(r['assets']))
-for a in r['assets']:
-    print('asset %s size=%d state=%s downloads=%d' % (a['name'], a['size'], a['state'], a['download_count']))
-PY
-          cat release-assets.txt
+          gh api repos/chengyouzheng/kidtv-guard/releases/tags/v2.0 --jq "{tag: .tag_name, name: .name, draft: .draft, prerelease: .prerelease, asset_count: (.assets|length), assets: [.assets[] | {name, size, state, download_count}]}" | tee release-assets.txt
       - name: Commit result
         run: |
           git config user.name "github-actions[bot]"
