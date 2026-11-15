@@ -1,1 +1,1 @@
-{"asset_count":0,"assets":[],"draft":false,"name":"v2.0 — 答题页视觉改版","prerelease":false,"tag":"v2.0"}
+{"asset_count":1,"assets":[{"download_count":0,"name":"kidtv-guard-v2.0.apk","size":488309,"state":"uploaded"}],"draft":false,"name":"v2.0 — 答题页视觉改版","prerelease":false,"tag":"v2.0"}
