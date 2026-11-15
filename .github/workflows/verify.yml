@@ -1,0 +1,38 @@
+name: verify-release
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/verify.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Dump release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -e
+          {
+            echo "repo=$GITHUB_REPOSITORY"
+            echo "----- assets -----"
+            gh api "repos/$GITHUB_REPOSITORY/releases/tags/v1.9" --jq '.assets[] | "\(.name)|\(.size)|\(.state)|\(.browser_download_url)"'
+            echo "----- count -----"
+            gh api "repos/$GITHUB_REPOSITORY/releases/tags/v1.9" --jq '.assets | length'
+          } > release-assets.txt
+          cat release-assets.txt
+
+      - name: Push result
+        run: |
+          set -e
+          git config user.name "kidtv-guard-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add release-assets.txt
+          if git diff --cached --quiet; then echo "no change"; else git commit -m "chore: 校验 Release 资产"; git push; fi
