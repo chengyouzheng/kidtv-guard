@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>学习看电视 · 家长面板</title>
+<style>
+  :root{--g:#2E7D32;--bg:#F3F7F1;--line:#DDE7DA;}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:#1e2b1c;}
+  .wrap{max-width:640px;margin:0 auto;padding:16px 16px 40px;}
+  h1{font-size:22px;margin:8px 0 4px}
+  .sub{color:#6c7a68;font-size:13px;margin-bottom:16px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px;}
+  .card h2{font-size:16px;margin:0 0 12px;color:#26401f}
+  .row{display:flex;gap:10px;flex-wrap:wrap}
+  .f{flex:1 1 130px;display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
+  .f label{font-size:13px;color:#5f6b5a}
+  input,select{font-size:16px;padding:9px 10px;border:1px solid #cfdccb;border-radius:10px;background:#fbfdfa;width:100%}
+  button{font-size:16px;padding:11px 16px;border-radius:12px;border:0;background:var(--g);color:#fff;cursor:pointer}
+  button.ghost{background:#eaf3e8;color:#2E7D32}
+  button.danger{background:#c62828}
+  .stat{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+  .stat .k{flex:1 1 30%;background:#f4faf2;border-radius:10px;padding:10px;text-align:center}
+  .stat .k b{display:block;font-size:22px;color:var(--g)}
+  .stat .k span{font-size:12px;color:#6c7a68}
+  textarea{width:100%;min-height:120px;font-size:13px;font-family:monospace;padding:10px;border:1px solid #cfdccb;border-radius:10px}
+  .msg{padding:9px 12px;border-radius:10px;font-size:14px;margin-bottom:12px;display:none}
+  .msg.ok{display:block;background:#e7f5e6;color:#1b5e20}
+  .msg.err{display:block;background:#fdecea;color:#b71c1c}
+  .hint{font-size:12px;color:#7b8877;line-height:1.5}
+  .lock{position:fixed;inset:0;background:rgba(243,247,241,.98);display:flex;align-items:center;justify-content:center;padding:20px}
+  .lock .box{max-width:340px;width:100%;background:#fff;border-radius:16px;padding:20px;border:1px solid var(--line)}
+</style>
+</head>
+<body>
+<div id="lock" class="lock">
+  <div class="box">
+    <h1>家长面板</h1>
+    <div class="sub">输入家长密码（和电视上设置的一致）</div>
+    <div class="f"><label>密码</label><input id="pwdInput" type="password" autocomplete="off"></div>
+    <button id="goBtn" style="width:100%">进入</button>
+    <div class="hint" style="margin-top:12px">提示：只有同一 WiFi 下的设备能打开这个页面。</div>
+  </div>
+</div>
+
+<div class="wrap">
+  <h1>学习看电视 · 家长面板</h1>
+  <div class="sub" id="hostLine"></div>
+  <div class="msg" id="msg"></div>
+
+  <div class="card">
+    <h2>今天的情况</h2>
+    <div class="stat">
+      <div class="k"><b id="sUsed">-</b><span>已看（分钟）</span></div>
+      <div class="k"><b id="sLimit">-</b><span>今日上限</span></div>
+      <div class="k"><b id="sRemain">-</b><span>还剩</span></div>
+    </div>
+    <div class="hint" id="sExtra"></div>
+  </div>
+
+  <div class="card">
+    <h2>手机扫码进入（地址跟着电视 IP 自动变）</h2>
+    <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap">
+      <img id="qrImg" alt="面板二维码" style="width:170px;height:170px;border:1px solid var(--line);border-radius:10px;background:#fff">
+      <div class="hint" style="flex:1;min-width:180px" id="qrHint"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>修改家长密码</h2>
+    <div class="row">
+      <div class="f"><label>新密码（至少 4 位）</label><input id="np1" type="password" autocomplete="new-password"></div>
+      <div class="f"><label>再输一次</label><input id="np2" type="password" autocomplete="new-password"></div>
+    </div>
+    <button id="pwdBtn" style="width:100%">修改密码</button>
+    <div class="hint" style="margin-top:8px">改完手机端会用新密码；电视上的「家长设置」「联系家长解锁」也都用新密码。</div>
+  </div>
+
+  <div class="card">
+    <h2>规则</h2>
+    <div class="row">
+      <div class="f"><label>每日基础时长（分钟）</label><input id="cDaily" type="number" min="0" max="720"></div>
+      <div class="f"><label>允许时段开始</label><input id="cWs" type="time"></div>
+      <div class="f"><label>允许时段结束</label><input id="cWe" type="time"></div>
+    </div>
+    <div class="row">
+      <div class="f"><label>一轮题数</label><input id="cQc" type="number" min="1" max="50"></div>
+      <div class="f"><label>及格线（%）</label><input id="cPass" type="number" min="1" max="100"></div>
+      <div class="f"><label>通过奖励（分钟）</label><input id="cReward" type="number" min="0" max="600"></div>
+    </div>
+    <div class="f"><label>管控开关</label>
+      <select id="cEnabled"><option value="1">开启</option><option value="0">关闭</option></select>
+    </div>
+    <div class="row" style="margin-top:6px">
+      <button id="saveBtn" style="flex:1">保存规则</button>
+      <button id="clearBtn" class="ghost" style="flex:1">今日用量清零</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>远程放行（家长在手机上操作）</h2>
+    <div class="hint" id="pauseInfo" style="margin-bottom:10px"></div>
+    <div class="row">
+      <button id="unlock10Btn" style="flex:1">放行 10 分钟</button>
+      <button id="unlock30Btn" class="ghost" style="flex:1">放行 30 分钟</button>
+      <button id="relockBtn" class="danger" style="flex:1">立即恢复管控</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>教材（年级 / 上册下册）</h2>
+    <div class="hint" id="bookInfo" style="margin-bottom:10px"></div>
+    <div class="f">
+      <label>选择册别，切换后孩子答题就用这一册</label>
+      <select id="bookSel"></select>
+    </div>
+    <button id="bookBtn" style="width:100%">切换到这一册</button>
+  </div>
+
+  <div class="card">
+    <h2>题库</h2>
+    <div class="hint" id="bankInfo" style="margin-bottom:10px"></div>
+    <div class="f"><label>粘贴题库 JSON（格式 {"items":[...]}）</label><textarea id="bankText" placeholder='{"items":[{"q":"1+1=?","a":["1","2"],"k":1,"type":"single"}]}'></textarea></div>
+    <div class="row">
+      <button id="importBtn" style="flex:1">导入题库</button>
+      <button id="resetBankBtn" class="ghost" style="flex:1">恢复内置题</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>白名单（不算看电视的应用）</h2>
+    <div class="f"><label>包名，逗号分隔</label><textarea id="whiteList" style="min-height:80px;font-size:12px"></textarea></div>
+    <button id="saveWhiteBtn" class="ghost" style="width:100%">保存白名单</button>
+  </div>
+
+  <div class="card">
+    <h2>说明</h2>
+    <div class="hint">
+      孩子看电视的时间按「非白名单应用在前台」累计，超出今日上限或不在允许时段时，
+      电视上会弹出拦截页，可以去做题换时长。<br>
+      这个 App 不能阻止被卸载或强行停止；如需更硬的管控，可在路由器侧按时段限制盒子联网。
+    </div>
+  </div>
+</div>
+
+<script>
+var pwd = localStorage.getItem('kidtv_pwd') || '';
+
+function el(id){return document.getElementById(id);}
+function showMsg(t, ok){
+  var m = el('msg'); m.textContent = t; m.className = 'msg ' + (ok ? 'ok' : 'err');
+  clearTimeout(showMsg._t);
+  showMsg._t = setTimeout(function(){ m.className = 'msg'; }, 5000);
+}
+function api(path, body){
+  var h = {'X-Pwd': encodeURIComponent(pwd)};
+  if (body) h['Content-Type'] = 'application/json';
+  return fetch(path,{method: body ? 'POST' : 'GET', headers: h, body: body ? JSON.stringify(body) : null})
+    .then(function(r){ return r.json(); });
+}
+function render(s){
+  if(!s.ok){ showMsg(s.error || '读取失败', false); return; }
+  el('sUsed').textContent = s.usedMin;
+  el('sLimit').textContent = s.limitMin;
+  el('sRemain').textContent = s.remainMin;
+  el('sExtra').textContent = '基础 ' + s.baseMin + ' 分钟 + 答题奖励 ' + s.bonusMin + ' 分钟；允许时段 '
+    + s.ws + '–' + s.we + (s.inWindow ? '（当前可看）' : '（当前不可看）')
+    + '；今日答题 ' + s.quizRounds + ' 轮，通过 ' + s.quizPass + ' 轮';
+  el('cDaily').value = s.baseMin;
+  el('cWs').value = s.ws;
+  el('cWe').value = s.we;
+  el('cQc').value = s.qc;
+  el('cPass').value = s.pass;
+  el('cReward').value = s.reward;
+  el('cEnabled').value = s.enabled ? '1' : '0';
+  el('whiteList').value = s.whitelist || '';
+  el('bankInfo').textContent = '当前题库：' + s.bankCount + ' 道题';
+  if(s.books && s.books.length){
+    var cur = s.book || 'base';
+    var html = '';
+    var lastGrade = null;
+    for(var i=0;i<s.books.length;i++){
+      var b = s.books[i];
+      var g = b.grade || 0;
+      if(g && g !== lastGrade){
+        if(lastGrade !== null) html += '</optgroup>';
+        html += '<optgroup label="' + g + ' 年级">';
+      }
+      lastGrade = g;
+      html += '<option value="' + b.id + '"' + (b.id===cur?' selected':'') + '>'
+        + b.name + (b.desc ? '（' + b.desc + '）' : '') + '</option>';
+    }
+    if(lastGrade !== null) html += '</optgroup>';
+    el('bookSel').innerHTML = html;
+    el('bookInfo').textContent = '当前使用：' + (s.bookName || cur) + '，共 ' + s.bankCount + ' 道题';
+  }
+  el('pauseInfo').textContent = (s.pauseLeftMin > 0)
+    ? ('当前处于放行状态，还剩 ' + s.pauseLeftMin + ' 分钟（不计时、不拦截）')
+    : '当前管控正常：时间用完或不在允许时段会拦截';
+  el('hostLine').textContent = location.host + ' · 手机需与电视在同一 WiFi';
+  // 二维码按当前访问地址生成：无论看电视的 IP 怎么变，扫到的都是现在这个地址
+  var u = location.origin + '/';
+  el('qrImg').src = '/qr.png?u=' + encodeURIComponent(u);
+  el('qrHint').textContent = '这个码指向 ' + u
+    + '。下次电视 IP 变了，直接到电视首页看新的二维码，或在这个页面刷新一下即可，不用记 IP。';
+}
+function load(){
+  api('/api/state').then(function(s){
+    if(s.ok === false && /密码/.test(s.error || '')){ el('lock').style.display = 'flex'; return; }
+    el('lock').style.display = 'none';
+    render(s);
+  }).catch(function(e){ showMsg('连不上电视，请在电视上打开本应用', false); });
+}
+
+el('goBtn').onclick = function(){
+  var v = el('pwdInput').value.trim();
+  if(!v) return;
+  pwd = v;
+  api('/api/state').then(function(s){
+    if(s.ok){ localStorage.setItem('kidtv_pwd', pwd); el('lock').style.display='none'; render(s); }
+    else { showMsg(s.error || '密码不对', false); }
+  });
+};
+el('pwdInput').addEventListener('keydown', function(e){ if(e.key === 'Enter') el('goBtn').click(); });
+
+el('saveBtn').onclick = function(){
+  api('/api/config', {
+    daily: parseInt(el('cDaily').value, 10) || 0,
+    ws: el('cWs').value,
+    we: el('cWe').value,
+    qc: parseInt(el('cQc').value, 10) || 5,
+    pass: parseInt(el('cPass').value, 10) || 80,
+    reward: parseInt(el('cReward').value, 10) || 0,
+    enabled: el('cEnabled').value === '1'
+  }).then(function(s){
+    if(s.ok){ render(s); showMsg('规则已保存', true); } else { showMsg(s.error, false); }
+  });
+};
+el('saveWhiteBtn').onclick = function(){
+  api('/api/config', {whitelist: el('whiteList').value}).then(function(s){
+    if(s.ok){ render(s); showMsg('白名单已保存', true); } else { showMsg(s.error, false); }
+  });
+};
+el('clearBtn').onclick = function(){
+  if(!confirm('把今天的已看时长和答题奖励都清零？')) return;
+  api('/api/clear', {}).then(function(s){ render(s); showMsg('今日用量已清零', true); });
+};
+el('pwdBtn').onclick = function(){
+  var a = el('np1').value.trim(), b = el('np2').value.trim();
+  if(a.length < 4){ showMsg('新密码至少 4 位', false); return; }
+  if(a !== b){ showMsg('两次输入不一致', false); return; }
+  api('/api/pwd', {new: a}).then(function(s){
+    if(s.ok){
+      pwd = a; localStorage.setItem('kidtv_pwd', pwd);
+      el('np1').value = ''; el('np2').value = '';
+      showMsg('家长密码已改成新的，手机上已记住', true);
+    } else { showMsg(s.error || '改密码失败', false); }
+  });
+};
+el('unlock10Btn').onclick = function(){
+  api('/api/unlock', {min: 10}).then(function(s){
+    if(s.ok){ render(s); showMsg('已放行 10 分钟', true); } else { showMsg(s.error, false); }
+  });
+};
+el('unlock30Btn').onclick = function(){
+  api('/api/unlock', {min: 30}).then(function(s){
+    if(s.ok){ render(s); showMsg('已放行 30 分钟', true); } else { showMsg(s.error, false); }
+  });
+};
+el('relockBtn').onclick = function(){
+  api('/api/relock', {}).then(function(s){
+    if(s.ok){ render(s); showMsg('已恢复管控', true); } else { showMsg(s.error, false); }
+  });
+};
+el('bookBtn').onclick = function(){
+  var id = el('bookSel').value;
+  if(!id){ showMsg('先选一册', false); return; }
+  api('/api/book', {id: id}).then(function(s){
+    if(s.ok){ render(s); showMsg('已切换到 ' + (s.bookName || id) + '，共 ' + s.bankCount + ' 道题', true); }
+    else { showMsg('切换失败：' + s.error, false); }
+  });
+};
+el('importBtn').onclick = function(){
+  var txt = el('bankText').value.trim();
+  if(!txt){ showMsg('先粘贴题库 JSON', false); return; }
+  api('/api/bank', {json: txt}).then(function(s){
+    if(s.ok){ el('bankInfo').textContent = '当前题库：' + s.count + ' 道题'; showMsg('已导入 ' + s.count + ' 道题', true); el('bankText').value=''; }
+    else { showMsg('导入失败：' + s.error, false); }
+  });
+};
+el('resetBankBtn').onclick = function(){
+  if(!confirm('把当前这一册恢复成出厂原题？（你导入的改动会清掉）')) return;
+  api('/api/resetbank', {}).then(function(s){
+    if(s.ok){ el('bankInfo').textContent = '当前题库：' + s.count + ' 道题'; showMsg('已恢复本册原题', true); el('bookInfo').textContent = '当前使用：' + (s.bookName || '') + '，共 ' + s.count + ' 道题'; }
+  });
+};
+
+if(pwd){ api('/api/state').then(function(s){ if(s.ok){ el('lock').style.display='none'; render(s); } else { el('lock').style.display='flex'; } }); }
+else { load(); }
+</script>
+</body>
+</html>

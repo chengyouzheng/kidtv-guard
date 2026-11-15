@@ -1,0 +1,43 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.kidtv.guard'
+    compileSdk 30
+
+    defaultConfig {
+        applicationId 'com.kidtv.guard'
+        minSdk 19
+        targetSdk 28
+        versionCode 10
+        versionName '1.9'
+    }
+
+    buildTypes {
+        debug {
+            minifyEnabled false
+        }
+        release {
+            minifyEnabled false
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    lintOptions {
+        checkReleaseBuilds false
+        abortOnError false
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+dependencies {
+    implementation 'com.google.zxing:core:3.2.1'
+}
