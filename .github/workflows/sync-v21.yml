@@ -1,0 +1,37 @@
+name: sync-v21
+
+on: push
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download bundle
+        run: |
+          curl -fL -o /tmp/v21.tar.gz https://aka.doubaocdn.com/s/MUb5COMLm6
+          tar -xzf /tmp/v21.tar.gz -C .
+          ls -l app/src/main/assets/panel.html app/build.gradle docs/screenshots/06-panel.png kidtv-guard-v2.1.apk
+
+      - name: Commit sources
+        run: |
+          git config user.name chengyouzheng
+          git config user.email 743239848@qq.com
+          git add app/src/main/assets/panel.html app/build.gradle docs/screenshots/06-panel.png
+          git commit -m "v2.1: 家长面板视觉改版" || echo "nothing to commit"
+          git push
+
+      - name: Create release v2.1
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v2.1
+          name: v2.1 — 家长面板视觉改版
+          body: |
+            手机家长面板换新样式：浅绿渐变底、白色圆角卡片、今日剩余分钟大白数字 + 进度条、时段/答题/放行状态胶囊，整体字号加大，按钮更高更好点。
+            所有接口与交互逻辑保持不变（改密码、规则、放行、教材、题库、白名单、二维码）。
+          files: kidtv-guard-v2.1.apk
+          overwrite_files: true
