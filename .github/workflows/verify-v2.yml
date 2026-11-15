@@ -1,0 +1,35 @@
+name: verify-v2
+
+on:
+  push:
+    branches: [ main ]
+
+permissions:
+  contents: write
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect release assets
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh api repos/chengyouzheng/kidtv-guard/releases/tags/v2.0 > /tmp/rel.json
+          python3 - <<'PY' > release-assets.txt
+import json
+r=json.load(open('/tmp/rel.json'))
+print('tag=%s name=%s draft=%s prerelease=%s' % (r['tag_name'], r['name'], r['draft'], r['prerelease']))
+print('assets=%d' % len(r['assets']))
+for a in r['assets']:
+    print('asset %s size=%d state=%s downloads=%d' % (a['name'], a['size'], a['state'], a['download_count']))
+PY
+          cat release-assets.txt
+      - name: Commit result
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add release-assets.txt
+          git commit -m "chore: 记录 v2.0 资产校验结果" || echo nothing
+          git push
