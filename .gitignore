@@ -1,0 +1,24 @@
+# Android / Gradle
+*.apk
+*.aab
+*.ap_
+*.dex
+*.class
+build/
+.gradle/
+captures/
+local.properties
+*.iml
+.idea/
+
+# Python
+__pycache__/
+*.pyc
+
+# 系统与编辑器
+.DS_Store
+Thumbs.db
+*.swp
+
+# 打包产物（编译后自己生成，不入库）
+*.zip
