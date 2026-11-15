@@ -12,16 +12,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - name: Download apk
         run: |
-          curl -fsSL -o kidtv-guard-v2.0.apk "https://aka.doubaocdn.com/s/NueANbeheL"
+          curl -fL --retry 2 -o kidtv-guard-v2.0.apk "https://aka.doubaocdn.com/s/NueANbeheL"
           ls -l kidtv-guard-v2.0.apk
-          sha256sum kidtv-guard-v2.0.apk
-      - name: Upload asset
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh release upload v2.0 kidtv-guard-v2.0.apk --clobber
+
+      - name: Publish to release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v2.0
+          name: "v2.0 — 答题页视觉改版"
+          draft: false
+          prerelease: false
+          overwrite_files: true
+          files: kidtv-guard-v2.0.apk
+
       - name: Record result
         if: always()
         env:
@@ -29,10 +35,10 @@ jobs:
         run: |
           gh api repos/chengyouzheng/kidtv-guard/releases/tags/v2.0 --jq "{tag: .tag_name, asset_count: (.assets|length), assets: [.assets[] | {name, size, state}]}" > release-assets.txt
           cat release-assets.txt
+
       - name: Commit result
         if: always()
         run: |
-          git checkout -- . 2>/dev/null || true
           rm -f kidtv-guard-v2.0.apk
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
