@@ -46,13 +46,13 @@
 
 ## 安装
 
-1. 下载 [Releases](../../releases) 里的 `kidtv-guard-v2.0.apk`。
+1. 下载 [Releases](../../releases) 里的 `kidtv-guard-v2.1.apk`。
 2. 电视打开「设置 → 关于 → 连点版本号」开启开发者模式，再打开 **USB/网络调试**（不同厂商路径不一样，有的在「设置 → 更多设置 → 开发者选项」）。
 3. 用 adb 安装（盒子一般允许 `adb connect`）：
 
 ```bash
 adb connect <盒子的局域网IP>:5555
-adb install -r kidtv-guard-v2.0.apk
+adb install -r kidtv-guard-v2.1.apk
 adb shell monkey -p com.kidtv.guard -c android.intent.category.LAUNCHER 1
 ```
 
