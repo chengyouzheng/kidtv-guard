@@ -1,0 +1,54 @@
+name: sync-v2
+
+on:
+  push:
+    branches: [ main ]
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fetch v2.0 sources
+        run: |
+          curl -fsSL -o /tmp/v2src.tar.gz "https://aka.doubaocdn.com/s/NGEe8zKRjA"
+          tar -xzf /tmp/v2src.tar.gz -C .
+          ls -l app/src/main/java/com/kidtv/guard/QuizActivity.java docs/screenshots/02-quiz.png
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "v2.0: 答题页视觉改版（渐变底 + 圆角卡片 + 进度胶囊 + 三态按钮 + 自动滚动）" || echo "nothing to commit"
+          git push
+
+      - name: Fetch v2.0 apk
+        run: |
+          curl -fsSL -o "$RUNNER_TEMP/kidtv-guard-v2.0.apk" "https://aka.doubaocdn.com/s/NueANbeheL"
+          ls -l "$RUNNER_TEMP/kidtv-guard-v2.0.apk"
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v2.0
+          name: "v2.0 — 答题页视觉改版"
+          draft: false
+          prerelease: false
+          files: ${{ runner.temp }}/kidtv-guard-v2.0.apk
+          body: |
+            老安卓电视盒子做题换时长 App 的 v2.0。
+
+            本版只改回答题页的观感，管控逻辑、题库、语音都不变。
+
+            - 竖向渐变背景 + 白色圆角卡片 + 顶部题目进度胶囊。
+            - 选项按钮三态样式（普通 / 遥控器聚焦 / 按下），聚焦时是浅绿底 + 3dp 绿框。
+            - 作答后正确项绿底绿框、错选项红底红框、其余置灰；反馈条分绿/红两套配色，文案前缀 √ / ×。
+            - 「继续 / 提交答案」改为绿色实心大按钮。
+            - 顶部进度胶囊固定，解析较长时内容区自动滚动，保证「解析 + 继续」同屏可见。
+
+            安装包 kidtv-guard-v2.0.apk，面向 Android 4.4 / 5.x 老盒子（armv7a，约 477 KB）。新安卓设备请优先用 StudyOnTV 等成熟项目。
